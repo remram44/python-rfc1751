@@ -68,7 +68,7 @@ def bytes_to_words(array):
     array_with_parity = array + bytes((((parity << 6) & 0xFF),))
 
     return [
-        word_list[
+        WORD_LIST[
             _extract_bits(
                 array_with_parity,
                 i * BITS_PER_WORD,
@@ -102,7 +102,7 @@ def words_to_bytes(words):
            .replace('5', 'S')
         )
         try:
-            word_value = word_index[fixed_word]
+            word_value = WORD_INDEX[fixed_word]
         except KeyError:
             raise WrongWordError(word)
 
@@ -141,7 +141,7 @@ def string_to_bytes(words_str, *, sep=' '):
 
 
 # Dictionary for integer-word translations
-word_list = [
+WORD_LIST = [
     "A", "ABE", "ACE", "ACT", "AD", "ADA", "ADD",
     "AGO", "AID", "AIM", "AIR", "ALL", "ALP", "AM", "AMY", "AN", "ANA",
     "AND", "ANN", "ANT", "ANY", "APE", "APS", "APT", "ARC", "ARE", "ARK",
@@ -366,4 +366,4 @@ word_list = [
     "YEAR", "YELL", "YOGA", "YOKE",
 ]
 
-word_index = {word: num for num, word in enumerate(word_list)}
+WORD_INDEX = {word: num for num, word in enumerate(WORD_LIST)}
