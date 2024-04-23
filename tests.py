@@ -21,6 +21,13 @@ class TestRfc1751(unittest.TestCase):
             'RASH BUSH MILK LOOK BAD BRIM',
         )
 
+        self.assertEqual(
+            rfc1751.bytes_to_string(
+                [0xCC, 0xAC, 0x2A, 0xED, 0x59, 0x10, 0x56, 0xBE],
+            ),
+            'RASH BUSH MILK LOOK BAD BRIM',
+        )
+
     def test_decode(self):
         self.assertEqual(
             rfc1751.string_to_bytes(

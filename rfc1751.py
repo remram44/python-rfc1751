@@ -56,6 +56,7 @@ BITS_PER_WORD = 11
 def bytes_to_words(array):
     """Encode 8 bytes (64 bits) as a sequence of 6 English words.
     """
+    array = bytes(array)
     if len(array) != 8:
         raise WrongNumberOfBytesError(len(array))
 
