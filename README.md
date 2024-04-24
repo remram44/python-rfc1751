@@ -17,12 +17,27 @@ The algorithm turns a 64-bit string into 6 English words and vice versa. Two bit
 # Usage
 
 ```python
+>>> # Simple conversion from string or bytes
 >>> rfc1751.bytes_to_string([204, 172, 42, 237, 89, 16, 86, 190])
 'RASH BUSH MILK LOOK BAD BRIM'
 >>> rfc1751.bytes_to_string(b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE')
 'RASH BUSH MILK LOOK BAD BRIM'
+
+# You can specify the separator or get a sequence
+>>> rfc1751.bytes_to_string(b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE', sep='-').lower()
+'rash-bush-milk-look-bad-brim'
+>>> rfc1751.bytes_to_words(b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE')
+['RASH', 'BUSH', 'MILK', 'LOOK', 'BAD', 'BRIM']
+
+# Conversion back
 >>> rfc1751.string_to_bytes('RASH BUSH MILK LOOK BAD BRIM')
 b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE'
 >>> list(rfc1751.string_to_bytes('RASH BUSH MILK LOOK BAD BRIM'))
 [204, 172, 42, 237, 89, 16, 86, 190]
+
+# You can specify the separator or give a sequence
+>>> rfc1751.string_to_bytes('rash-bush-milk-look-bad-brim', sep='-')
+b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE'
+>>> rfc1751.words_to_bytes(['rash', 'bush', 'milk', 'look', 'bad', 'brim'])
+b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE'
 ```
