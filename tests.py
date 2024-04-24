@@ -65,3 +65,28 @@ class TestRfc1751(unittest.TestCase):
             rfc1751.string_to_bytes(
                 'RA5h BU5H mi1k 100k Bad Brow',
             )
+
+    def test_custom_alphabet(self):
+        a = ord('A')
+        alphabet = [
+            chr(a + i // (25 * 25))
+            + chr(a + (i // 25) % 25)
+            + chr(a + (i % (25)))
+            for i in range(2048)
+        ]
+
+        custom_rfc1751 = rfc1751.Rfc1751(alphabet)
+
+        self.assertEqual(
+            custom_rfc1751.bytes_to_string(
+                [0xCC, 0xAC, 0x2A, 0xED, 0x59, 0x10, 0x56, 0xBE],
+            ),
+            'CPM BGD CJX CHA ABS BFL',
+        )
+
+        self.assertEqual(
+            custom_rfc1751.string_to_bytes(
+                'CPM BGD CJX CHA ABS BFL',
+            ),
+            b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE',
+        )

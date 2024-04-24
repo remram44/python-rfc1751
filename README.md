@@ -40,4 +40,11 @@ b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE'
 b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE'
 >>> rfc1751.words_to_bytes(['rash', 'bush', 'milk', 'look', 'bad', 'brim'])
 b'\xCC\xAC\x2A\xED\x59\x10\x56\xBE'
+
+# You can also use a custom alphabet as long as it is 2048 words
+>>> custom_rfc1751 = rfc1751.Rfc1751(custom_2048_words)
+>>> custom_rfc1751.bytes_to_string([204, 172, 42, 237, 89, 16, 86, 190])
+'SMILE GENUINE ROBUST RATE AIR GAME'
+>>> list(custom_rfc1751.string_to_bytes('SMILE GENUINE ROBUST RATE AIR GAME'))
+[204, 172, 42, 237, 89, 16, 86, 190]
 ```

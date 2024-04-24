@@ -53,96 +53,99 @@ def _extract_bits(array, start, length):
 BITS_PER_WORD = 11
 
 
-def bytes_to_words(array):
-    """Encode 8 bytes (64 bits) as a sequence of 6 English words.
-    """
-    array = bytes(array)
-    if len(array) != 8:
-        raise WrongNumberOfBytesError(len(array))
+class Rfc1751(object):
+    def __init__(self, alphabet):
+        if len(alphabet) != 2048:
+            raise ValueError("RFC1751 alphabet needs to have 2048 words")
+        self.word_list = alphabet
+        self.word_index = {word: num for num, word in enumerate(alphabet)}
 
-    # Compute parity
-    parity = sum(
-        _extract_bits(array, i, 2)
-        for i in range(0, 64, 2)
-    )
+    def bytes_to_words(self, array):
+        """Encode 8 bytes (64 bits) as a sequence of 6 English words.
+        """
+        array = bytes(array)
+        if len(array) != 8:
+            raise WrongNumberOfBytesError(len(array))
 
-    array_with_parity = array + bytes((((parity << 6) & 0xFF),))
-
-    return [
-        WORD_LIST[
-            _extract_bits(
-                array_with_parity,
-                i * BITS_PER_WORD,
-                BITS_PER_WORD,
-            )
-        ]
-        for i in range(6)
-    ]
-
-
-def bytes_to_string(array, *, sep=' '):
-    """Encode 8 bytes (64 bits) as a string of 6 English words.
-    """
-    return sep.join(bytes_to_words(array))
-
-
-def words_to_bytes(words):
-    """Decode a sequence of 6 words to a binary string.
-    """
-    if len(words) != 6:
-        raise WrongNumberOfWordsError(len(words))
-
-    result = [0] * 10
-
-    for i, word in enumerate(words):
-        fixed_word = (
-           word
-           .upper()
-           .replace('1', 'L')
-           .replace('0', 'O')
-           .replace('5', 'S')
+        # Compute parity
+        parity = sum(
+            _extract_bits(array, i, 2)
+            for i in range(0, 64, 2)
         )
-        try:
-            word_value = WORD_INDEX[fixed_word]
-        except KeyError:
-            raise WrongWordError(word)
 
-        start = i * BITS_PER_WORD
-        shift = (8 - ((start + BITS_PER_WORD) % 8)) % 8
-        y = word_value << shift
-        cl = (y >> 16) & 0xFF
-        cc = (y >> 8) & 0xFF
-        cr = y & 0xFF
-        if shift + BITS_PER_WORD > 16:
-            result[start // 8] |= cl
-            result[start // 8 + 1] |= cc
-            result[start // 8 + 2] |= cr
-        elif shift + BITS_PER_WORD > 8:
-            result[start // 8] |= cc
-            result[start // 8 + 1] |= cr
-        else:
-            result[start // 8] |= cr
+        array_with_parity = array + bytes((((parity << 6) & 0xFF),))
 
-    result = bytes(result)
+        return [
+            self.word_list[
+                _extract_bits(
+                    array_with_parity,
+                    i * BITS_PER_WORD,
+                    BITS_PER_WORD,
+                )
+            ]
+            for i in range(6)
+        ]
 
-    # Check parity
-    parity = sum(
-        _extract_bits(result, i, 2)
-        for i in range(0, 64, 2)
-    )
-    if parity & 3 != _extract_bits(result, 64, 2):
-        raise ParityError
+    def bytes_to_string(self, array, *, sep=' '):
+        """Encode 8 bytes (64 bits) as a string of 6 English words.
+        """
+        return sep.join(self.bytes_to_words(array))
 
-    return result[:8]
+    def words_to_bytes(self, words):
+        """Decode a sequence of 6 words to a binary string.
+        """
+        if len(words) != 6:
+            raise WrongNumberOfWordsError(len(words))
+
+        result = [0] * 10
+
+        for i, word in enumerate(words):
+            fixed_word = (
+               word
+               .upper()
+               .replace('1', 'L')
+               .replace('0', 'O')
+               .replace('5', 'S')
+            )
+            try:
+                word_value = self.word_index[fixed_word]
+            except KeyError:
+                raise WrongWordError(word)
+
+            start = i * BITS_PER_WORD
+            shift = (8 - ((start + BITS_PER_WORD) % 8)) % 8
+            y = word_value << shift
+            cl = (y >> 16) & 0xFF
+            cc = (y >> 8) & 0xFF
+            cr = y & 0xFF
+            if shift + BITS_PER_WORD > 16:
+                result[start // 8] |= cl
+                result[start // 8 + 1] |= cc
+                result[start // 8 + 2] |= cr
+            elif shift + BITS_PER_WORD > 8:
+                result[start // 8] |= cc
+                result[start // 8 + 1] |= cr
+            else:
+                result[start // 8] |= cr
+
+        result = bytes(result)
+
+        # Check parity
+        parity = sum(
+            _extract_bits(result, i, 2)
+            for i in range(0, 64, 2)
+        )
+        if parity & 3 != _extract_bits(result, 64, 2):
+            raise ParityError
+
+        return result[:8]
+
+    def string_to_bytes(self, words_str, *, sep=' '):
+        words = words_str.split(sep)
+        return self.words_to_bytes(words)
 
 
-def string_to_bytes(words_str, *, sep=' '):
-    words = words_str.split(sep)
-    return words_to_bytes(words)
-
-
-# Dictionary for integer-word translations
-WORD_LIST = [
+default_alphabet = Rfc1751([
     "A", "ABE", "ACE", "ACT", "AD", "ADA", "ADD",
     "AGO", "AID", "AIM", "AIR", "ALL", "ALP", "AM", "AMY", "AN", "ANA",
     "AND", "ANN", "ANT", "ANY", "APE", "APS", "APT", "ARC", "ARE", "ARK",
@@ -365,6 +368,13 @@ WORD_LIST = [
     "WOOD", "WOOL", "WORD", "WORE", "WORK", "WORM", "WORN", "WOVE", "WRIT",
     "WYNN", "YALE", "YANG", "YANK", "YARD", "YARN", "YAWL", "YAWN", "YEAH",
     "YEAR", "YELL", "YOGA", "YOKE",
-]
+])
 
-WORD_INDEX = {word: num for num, word in enumerate(WORD_LIST)}
+
+bytes_to_words = default_alphabet.bytes_to_words
+
+bytes_to_string = default_alphabet.bytes_to_string
+
+words_to_bytes = default_alphabet.words_to_bytes
+
+string_to_bytes = default_alphabet.string_to_bytes
