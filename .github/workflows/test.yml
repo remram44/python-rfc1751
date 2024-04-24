@@ -1,0 +1,19 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  unittests:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.10", "3.12"]
+    runs-on: ubuntu-latest
+    container:
+      image: python:${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: python -m unittest discover
