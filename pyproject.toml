@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rfc1751"
-version = "0.1.0"
+version = "1.0.0"
 description = "Pure Python implementation of the binary-to-text encoding from RFC 1751, S/Key"
 
 license = "MIT"

@@ -1,3 +1,6 @@
+__version__ = '1.0.0'
+
+
 class Error(ValueError):
     """Error in RFC 1751 conversion"""
 
